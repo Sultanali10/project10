@@ -14,7 +14,13 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(pickImage))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .bookmarks, target: self, action: #selector(pickImageLib))
+        let cameraPicker = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(pickImageCam))
+        navigationItem.rightBarButtonItem = cameraPicker
+        cameraPicker.isEnabled = false
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            cameraPicker.isEnabled = true
+        }
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -60,8 +66,18 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
     }
     
     
-    @objc func pickImage(){
+    @objc func pickImageLib(){
         let picker = UIImagePickerController()
+        picker.sourceType = .photoLibrary
+        picker.allowsEditing = true
+        picker.delegate = self
+        
+       present(picker, animated: true)
+    }
+    
+    @objc func pickImageCam(){
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
         picker.allowsEditing = true
         picker.delegate = self
         
