@@ -36,15 +36,29 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let ac = UIAlertController(title: "Enter Name", message: nil, preferredStyle: .alert)
-        ac.addTextField()
-        ac.addAction(UIAlertAction(title: "OK", style: .default) { [weak self, weak ac] _ in
-            guard let name = ac?.textFields![0].text else {return}
-            self?.people[indexPath.item].name = name
+        
+        let alert = UIAlertController(title: "What Do you want to do?", message: nil, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Delete", style: .default) {
+            [weak self] _ in
+            self?.people.remove(at: indexPath.item)
             self?.collectionView.reloadData()
         })
-        present(ac, animated: true)
+        alert.addAction(UIAlertAction(title: "Rename", style: .default){
+            [weak self] _ in
+            let ac = UIAlertController(title: "Enter Name", message: nil, preferredStyle: .alert)
+            ac.addTextField()
+            ac.addAction(UIAlertAction(title: "OK", style: .default) { [weak self, weak ac] _ in
+                guard let name = ac?.textFields![0].text else {return}
+                self?.people[indexPath.item].name = name
+                self?.collectionView.reloadData()
+            })
+            self?.present(ac, animated: true)
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        present(alert, animated: true)
     }
+    
     
     @objc func pickImage(){
         let picker = UIImagePickerController()
