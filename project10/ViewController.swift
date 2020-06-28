@@ -21,6 +21,7 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
             cameraPicker.isEnabled = true
         }
+        getSavedPeopleArray()
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -42,7 +43,6 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
         let alert = UIAlertController(title: "What Do you want to do?", message: nil, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Delete", style: .default) {
             [weak self] _ in
@@ -56,12 +56,12 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
             ac.addAction(UIAlertAction(title: "OK", style: .default) { [weak self, weak ac] _ in
                 guard let name = ac?.textFields![0].text else {return}
                 self?.people[indexPath.item].name = name
+                self?.save()
                 self?.collectionView.reloadData()
             })
             self?.present(ac, animated: true)
         })
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        
         present(alert, animated: true)
     }
     
@@ -93,6 +93,7 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         }
         let person = Person(name: "unknown", image: imageName)
         people.append(person)
+        save()
         collectionView.reloadData()
 
         dismiss(animated: true)
@@ -102,7 +103,21 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return paths[0]
     }
-
-
+    
+    func save(){
+        if let savedData = try? NSKeyedArchiver.archivedData(withRootObject: people, requiringSecureCoding: false) {
+            let defaults = UserDefaults.standard
+            defaults.set(savedData, forKey: "people")
+        }
+    }
+    
+    func getSavedPeopleArray(){
+        let defaults = UserDefaults.standard
+        if let savedDate = defaults.object(forKey: "people") as? Data {
+            if let unarchivedData = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(savedDate) as? [Person] {
+                people = unarchivedData
+            }
+        }
+    }
 }
 
